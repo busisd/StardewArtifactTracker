@@ -41,7 +41,9 @@ def track_file():
 
 def main():
 	global target_file
-	target_file = sys.argv[0]
+	if len(sys.argv) != 2:
+		print("Please type python3 artifact_script.py [name_of_save_file]")
+	target_file = sys.argv[1]
 	track_file()
 	return
 

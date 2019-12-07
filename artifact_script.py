@@ -10,9 +10,9 @@ def list_artifacts(filename):
 	if filename != target_file:
 		return
 	print()
-	print("Today's artifact locations:")
 	tree = ET.parse(filename)
 	root = tree.getroot()
+	print("Artifact locations for "+makeDate(root))
 	locations = root.find("locations")
 	for loc in list(locations):
 		objs = loc.find("objects")
@@ -20,6 +20,13 @@ def list_artifacts(filename):
 			for item in list(objs):
 				if (item.find("value").find("Object").find("name").text.lower() == "artifact spot"):
 					print(loc.find("name").text+": ("+item.find("key")[0][0].text+", "+item.find("key")[0][1].text+")")
+
+def makeDate(root):
+	year = root.find("year").text
+	season = root.find("currentSeason").text
+	season = season[0].upper() + season[1:]
+	day = root.find("dayOfMonth").text
+	return season+" "+day+", Year "+year
 
 def track_file():
 	logging.basicConfig(level=logging.INFO,

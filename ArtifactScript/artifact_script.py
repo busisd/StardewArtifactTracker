@@ -1,9 +1,11 @@
 import xml.etree.ElementTree as ET
 import sys
+import os
 import time
 import logging
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from watchdog.events import FileModifiedEvent
 import math
 
 try:
@@ -30,13 +32,10 @@ if (len(object_data.data) < 2 or len(location_data.data) < 2):
 files with the .xnb file data. See README for how to do so.''', file=sys.stderr)
 
 
+
 target_file = None
 def list_artifacts(filename):
-	if filename != target_file.split("/")[-1]:
-		return
-	
 	print()
-	
 	tree = ET.parse(target_file)
 	root = tree.getroot()
 	print("Artifact locations for "+make_date(root))
@@ -96,7 +95,7 @@ def predict_item(root, item, loc_name):
 				str_index = loc_weights[i]
 				if (obj_is_arch(str_index) or str_index == "102"):
 					if str_index == "102":
-						return "Lost book or mixed seeds"
+						return "Lost Book or Mixed Seeds"
 					return get_obj_by_index(int(str_index))
 				# if (str_index == "330" and True and game1_random.Sample() < .11):
 					# return "Secret note"
@@ -110,13 +109,22 @@ def get_obj_by_index(index):
 def obj_is_arch(str_index):
 	return "Arch" in object_data.data[str_index].split("/")[3]
 
-def track_file():
+
+
+def handle_file_modified(event):
+	filename = event.src_path
+	if type(event) != FileModifiedEvent:
+		return
+	if (os.path.split(target_file)[-1] != os.path.split(filename)[-1]):
+		return
+	list_artifacts(event.src_path)
+	
+def track_file(path):
 	logging.basicConfig(level=logging.INFO,
 						format='%(asctime)s - %(message)s',
 						datefmt='%Y-%m-%d %H:%M:%S')
-	path = "../"
 	event_handler = FileSystemEventHandler()
-	event_handler.on_modified = lambda event : list_artifacts(event.src_path.split("/")[-1])
+	event_handler.on_modified = lambda event : handle_file_modified(event)
 	observer = Observer()
 	observer.schedule(event_handler, path, recursive=False)
 	observer.start()
@@ -129,12 +137,21 @@ def track_file():
 	print()
 
 def main():
-	global target_file
 	if len(sys.argv) != 2:
-		print("Please type python3 artifact_script.py [name_of_save_file]")
+		print("Correct usage: python3 artifact_script.py [path/to/savefile]", file=sys.stderr)
+		return
+	
+	global target_file
 	target_file = sys.argv[1]
-	list_artifacts(target_file.split("/")[-1])
-	track_file()
+	if not os.path.isfile(target_file):
+		print("Error: "+target_file+" is not a valid file", file=sys.stderr)
+		return
+	
+	list_artifacts(target_file)
+	path = os.path.dirname(target_file)
+	if path == "":
+		path = "./"
+	track_file(path)
 	return
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ Town: 120x110
 Bus stop: 35x30
 Woods: 60x32
 Mountain: 135x41
-
+Railroad: 70x62
 
 
 

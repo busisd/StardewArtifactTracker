@@ -7,6 +7,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from watchdog.events import FileModifiedEvent
 import math
+import json
 
 try:
 	import csrandom
@@ -33,8 +34,20 @@ files with the .xnb file data. See README for how to do so.''', file=sys.stderr)
 
 
 
+def write_json_to_file(json_obj, json_filename="data.json"):
+	full_filename = os.path.join(sys.path[0], json_filename)
+	with open(full_filename, "w") as json_file:
+		json_file.write(json.dumps(json_obj))
+		json_file.flush()
+
 target_file = None
 def list_artifacts(filename):
+	'''
+		Given a filename, will list each artifact spot in that file,
+		where those spots are, and what artifacts are in them
+	'''
+	final_json = []
+	
 	print()
 	tree = ET.parse(target_file)
 	root = tree.getroot()
@@ -50,8 +63,18 @@ def list_artifacts(filename):
 					item_y = item.find("key")[0][1].text
 					item_name = predict_item(root, item, loc_name)
 					print(loc_name+": ("+item_x+", "+item_y+") is "+item_name)
+					
+					#[loc, x, y, item]
+					new_row = [loc_name, item_x, item_y, item_name]
+					final_json.append(new_row)
+	
+	write_json_to_file(final_json)
 
 def make_date(root):
+	'''
+		Given the root of an XML tree corresponding to the savefile,
+		will display the date of that file in a nice format
+	'''
 	year = root.find("year").text
 	season = root.find("currentSeason").text
 	season = season[0].upper() + season[1:]
@@ -59,8 +82,14 @@ def make_date(root):
 	return season+" "+day+", Year "+year
 
 def predict_item(root, item, loc_name):
+	'''
+		Simulates the Stardew Valley logic and random number generation used 
+		to generate artifacts, in order to predict what will be generated
+	'''
+	
 	days_played = int(root.find("player").find("stats").find("daysPlayed").text)
 	uid = int(root.find("uniqueIDForThisGame").text)
+	lost_books_found = int(root.find("lostBooksFound").text)
 	item_x = int(item.find("key")[0][0].text)
 	item_y = int(item.find("key")[0][1].text)
 	season = root.find("currentSeason").text
@@ -78,7 +107,9 @@ def predict_item(root, item, loc_name):
 		if objectIndex != -1:
 			break
 	if (random.Sample() < .2 and loc_name != "Farm"):
-		return "Lost Book or Mixed Seeds" #objectIndex = 770 #Lost book and/or mixed seeds
+		objectIndex = 102 #Lost book
+	if (objectIndex == 102 and lost_books_found >= 21):
+		objectIndex = 770 #Mixed seeds
 	if objectIndex != -1:
 		return get_obj_by_index(objectIndex)
 	elif (season == "winter" and random.Sample() < .5 and loc_name != "Desert"):
@@ -94,8 +125,8 @@ def predict_item(root, item, loc_name):
 			if random.Sample() <= float(loc_weights[i+1]):
 				str_index = loc_weights[i]
 				if (obj_is_arch(str_index) or str_index == "102"):
-					if str_index == "102":
-						return "Lost Book or Mixed Seeds"
+					if (objectIndex == 102 and lost_books_found >= 21):
+						objectIndex = 770 #Mixed seeds
 					return get_obj_by_index(int(str_index))
 				# if (str_index == "330" and True and game1_random.Sample() < .11):
 					# return "Secret note"
@@ -104,14 +135,24 @@ def predict_item(root, item, loc_name):
 				return str(random.Next(1,4))+" "+get_obj_by_index(int(str_index))
 
 def get_obj_by_index(index):
+	'''
+		Returns the name of the object in object_data.data with the given index
+	'''
 	return object_data.data[str(index)].split("/")[0]
 	
 def obj_is_arch(str_index):
+	'''
+		Returns whether the item is classified as an archeology item
+	'''
 	return "Arch" in object_data.data[str_index].split("/")[3]
 
 
 
 def handle_file_modified(event):
+	'''
+		If the event is a FileModifiedEvent and it is about the 
+		target file, calls list_artifacts on the modified file
+	'''
 	filename = event.src_path
 	if type(event) != FileModifiedEvent:
 		return
@@ -120,6 +161,10 @@ def handle_file_modified(event):
 	list_artifacts(event.src_path)
 	
 def track_file(path):
+	'''
+		Sets up a watchdog Observer that calles handle_file_modified whenever
+		a file in the given path is modified.
+	'''
 	logging.basicConfig(level=logging.INFO,
 						format='%(asctime)s - %(message)s',
 						datefmt='%Y-%m-%d %H:%M:%S')

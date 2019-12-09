@@ -2,6 +2,10 @@ body {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	
+	background-image: url("backgrounds/stardew_bg.png");
+	background-repeat: no-repeat;
+	background-attachment: fixed;
 }
 
 .map {
@@ -16,6 +20,11 @@ body {
 	width: 40%;
 	margin-top: 12pt;
 	margin-bottom: 12pt;
+	
+    padding: 20px;
+    background-color: rgba(255,255,255,.65);
+    border-radius: 20px;
+    border: 1px solid rgba(220,220,220,.65);
 }
 
 img {

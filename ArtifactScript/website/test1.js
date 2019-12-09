@@ -5,6 +5,7 @@ class ValleyMap {
 		this.width = width;
 		this.height = height;
 		this.img_div = this.makeImgDiv();
+		this.wrapper_div = this.makeWrapperDiv();
 		this.spot_width = 1/width;
 		this.spot_height = 1/height;
 	}
@@ -22,8 +23,21 @@ class ValleyMap {
 		return this_img_div;
 	}
 	
+	makeWrapperDiv() {
+		var wrapper_div = document.createElement("div");
+		wrapper_div.className="wrapper";
+		
+		var title_span = document.createElement("span");
+		title_span.innerText = this.name+":";
+		wrapper_div.appendChild(title_span);
+		
+		wrapper_div.appendChild(this.img_div);
+		
+		return wrapper_div;
+	}
+	
 	addSelfTo(node) {
-		node.appendChild(this.img_div);
+		node.appendChild(this.wrapper_div);
 	}
 	
 	addSpot(x, y) {
@@ -48,6 +62,26 @@ class ValleyMap {
 		}
 	}
 	
+	addTag(x, y, item_name) {
+		let new_span = document.createElement("span");
+		let x_str = x.toString();
+		let y_str = y.toString();
+		new_span.innerText = item_name+" at ("+x_str+", "+y_str+")";
+		this.wrapper_div.appendChild(new_span);
+		this.wrapper_div.appendChild(document.createElement("br"));
+	}
+	
+	addSpotAndTag(data_row) {
+		this.addSpot(data_row[1], data_row[2]);
+		this.addTag(data_row[1], data_row[2], data_row[3]);
+	}
+	
+	removeTags() {
+		while (this.wrapper_div.children.length > 2) {
+			this.wrapper_div.removeChild(this.wrapper_div.children[2]);
+		}
+	}
+	
 	static doubleToPercent(d) {
 		return (d*100).toString()+"%"
 	}
@@ -65,7 +99,8 @@ var maps_info = [
 	["BusStop", 35, 30],
 	["Woods", 60, 32],
 	["Mountain", 135, 41],
-	["Railroad", 70, 62]
+	["Railroad", 70, 62],
+	["Backwoods", 50, 40]
 ]
 
 maps_dict = {};
@@ -75,23 +110,39 @@ for (let i=0; i<maps_info.length; i++){
 	maps_dict[cur_row[0]].addSelfTo(document.body);
 }
 
-function remove_all_spots() {
+function removeAllSpotsAndTags() {
 	all_maps = Object.entries(maps_dict);
 	for (let i=0; i<all_maps.length; i++) {
 		all_maps[i][1].removeSpots();
+		all_maps[i][1].removeTags();
 	}
 
 }
 
-var test_data = [["Farm", "74", "13", "2 Clay or Secret Note"], ["Farm", "28", "38", "2 Clay or Secret Note"], ["Farm", "16", "49", "Winter Root"], ["Farm", "15", "30", "1 Stone"], ["Town", "16", "63", "2 Clay or Secret Note"], ["Town", "87", "103", "Lost Book"], ["Town", "79", "16", "Winter Root"], ["Beach", "42", "21", "Lost Book"], ["Beach", "36", "21", "2 Clay or Secret Note"], ["Mountain", "41", "30", "1 Clay or Secret Note"], ["Mountain", "45", "19", "1 Clay or Secret Note"], ["Forest", "74", "44", "Winter Root"], ["Forest", "79", "68", "2 Clay or Secret Note"], ["Forest", "89", "25", "2 Clay or Secret Note"], ["Forest", "37", "90", "Lost Book"], ["Forest", "75", "10", "Ancient Sword"], ["BusStop", "16", "23", "Winter Root"], ["BusStop", "21", "11", "Prehistoric Handaxe"], ["BusStop", "27", "11", "Winter Root"], ["BusStop", "8", "12", "3 Clay or Secret Note"], ["BusStop", "10", "4", "3 Clay or Secret Note"], ["BusStop", "2", "24", "Winter Root"], ["Desert", "21", "35", "Golden Relic"], ["Desert", "15", "37", "2 Clay or Secret Note"], ["Desert", "30", "46", "2 Clay or Secret Note"], ["Desert", "4", "54", "Lost Book"], ["Desert", "14", "43", "3 Clay or Secret Note"], ["Woods", "45", "10", "Lost Book"], ["Woods", "41", "16", "Snow Yam"], ["Woods", "25", "13", "2 Clay or Secret Note"], ["Woods", "23", "17", "Lost Book"], ["Railroad", "47", "56", "Winter Root"]]
-
-function populate_artifact_spots(data) {
-	remove_all_spots();
-	for (let i=0; i<test_data.length; i++){
-		maps_dict[data[i][0]].addSpot(data[i][1], data[i][2]);
+function populateArtifactSpots(data) {
+	removeAllSpotsAndTags();
+	for (let i=0; i<data.length; i++){
+		maps_dict[data[i][0]].addSpotAndTag(data[i]);
 	}
 }
 
-populate_artifact_spots(test_data);
+function pingServerAndUpdate() {
+	$.getJSON("http://127.0.0.1:5000/", function(result){
+		// console.log(result);
+		populateArtifactSpots(result);
+	});
+}
 
+var update_interval = setInterval(pingServerAndUpdate, 3000);
+update_button = document.getElementById("update_button");
+$(update_button).click(function(){
+	if (update_interval !== null) {
+		clearInterval(update_interval);
+		update_interval = null;
+		update_button.innerText = "Start Auto Reload";
+	} else {
+		update_interval = setInterval(pingServerAndUpdate, 3000);
+		update_button.innerText = "Stop Auto Reload";
+	}
+});
 

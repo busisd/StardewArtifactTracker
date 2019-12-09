@@ -1,0 +1,38 @@
+body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#square1 {
+	background-color: green;
+	position: relative;
+	width: 800px;
+	height: 800px;
+}
+
+#square2 {
+	background-color: red;
+	position: absolute;
+	top: 50%;
+	bottom: 40%;
+	left: 20%;
+	right: 77%;
+}
+
+.map {
+	position: relative;
+	display: inline-block;
+	width: 40%;
+	height: fit-content;
+}
+
+img {
+	width: 100%;
+	height: auto;
+}
+
+.artifact_spot {
+	position: absolute;
+	background-color: red;
+}

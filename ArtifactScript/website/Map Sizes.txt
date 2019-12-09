@@ -1,0 +1,13 @@
+Forest: 120x120
+Farm: 80x65
+Beach: 104x50
+Desert: 50x60
+Town: 120x110
+Bus stop: 35x30
+Woods: 60x32
+Mountain: 135x41
+
+
+
+
+

@@ -27,3 +27,28 @@ img {
 	position: absolute;
 	background-color: red;
 }
+
+.artifact_spot_hover {
+	position: absolute;
+	left: 20px;
+	padding: 10px;
+	margin-top: -15px;
+	background-color: white;
+	white-space: pre;
+	border-radius: 5px;
+	opacity: 0;
+}
+
+.fadein {
+	opacity: 1;
+	transition: opacity .15s linear;
+}
+
+.fadeout {
+	opacity: 0;
+	transition: opacity .15s linear;
+}
+
+h2, h3 {
+	margin: 0;
+}

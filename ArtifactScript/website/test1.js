@@ -27,7 +27,7 @@ class ValleyMap {
 		var wrapper_div = document.createElement("div");
 		wrapper_div.className="wrapper";
 		
-		var title_span = document.createElement("span");
+		var title_span = document.createElement("h2");
 		title_span.innerText = this.name+":";
 		wrapper_div.appendChild(title_span);
 		
@@ -40,7 +40,7 @@ class ValleyMap {
 		node.appendChild(this.wrapper_div);
 	}
 	
-	addSpot(x, y) {
+	addSpot(x, y, item_name) {
 		var hori_center = x*this.spot_width + this.spot_width/2
 		var vert_center = y*this.spot_height + this.spot_height/2
 		
@@ -54,6 +54,22 @@ class ValleyMap {
 		new_spot.style.bottom = ValleyMap.doubleToPercent(1 - (vert_center+this.spot_height/2))
 		
 		this.img_div.appendChild(new_spot);
+		
+		let new_hover = document.createElement("span");
+		new_hover.className = "artifact_spot_hover";
+		new_hover.innerText = item_name;
+		new_spot.appendChild(new_hover);
+		
+		new_spot.onmouseover = function() {
+			// new_hover.style.visibility = "visible"	
+			new_hover.classList.remove("fadeout");
+			new_hover.classList.add("fadein");
+		}
+		new_spot.onmouseout = function() {
+			// new_hover.style.visibility = "hidden"			
+			new_hover.classList.remove("fadein");
+			new_hover.classList.add("fadeout");
+		}
 	}
 	
 	removeSpots() {
@@ -66,13 +82,13 @@ class ValleyMap {
 		let new_span = document.createElement("span");
 		let x_str = x.toString();
 		let y_str = y.toString();
-		new_span.innerText = item_name+" at ("+x_str+", "+y_str+")";
+		new_span.innerText = item_name+" at ("+x_str+", "+y_str+")";		
 		this.wrapper_div.appendChild(new_span);
 		this.wrapper_div.appendChild(document.createElement("br"));
 	}
 	
 	addSpotAndTag(data_row) {
-		this.addSpot(data_row[1], data_row[2]);
+		this.addSpot(data_row[1], data_row[2], data_row[3]);
 		this.addTag(data_row[1], data_row[2], data_row[3]);
 	}
 	
@@ -126,14 +142,19 @@ function populateArtifactSpots(data) {
 	}
 }
 
+var prev_date = null;
 function pingServerAndUpdate() {
 	$.getJSON("http://127.0.0.1:5000/", function(result){
 		// console.log(result);
-		populateArtifactSpots(result);
+		if (prev_date !== result["date"]){
+			populateArtifactSpots(result["content"]);
+			prev_date = result["date"];
+		}
 	});
 }
 
-var update_interval = setInterval(pingServerAndUpdate, 3000);
+pingServerAndUpdate();
+var update_interval = setInterval(pingServerAndUpdate, 5000);
 update_button = document.getElementById("update_button");
 $(update_button).click(function(){
 	if (update_interval !== null) {
@@ -141,7 +162,7 @@ $(update_button).click(function(){
 		update_interval = null;
 		update_button.innerText = "Start Auto Reload";
 	} else {
-		update_interval = setInterval(pingServerAndUpdate, 3000);
+		update_interval = setInterval(pingServerAndUpdate, 5000);
 		update_button.innerText = "Stop Auto Reload";
 	}
 });

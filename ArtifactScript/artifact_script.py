@@ -46,12 +46,16 @@ def list_artifacts(filename):
 		Given a filename, will list each artifact spot in that file,
 		where those spots are, and what artifacts are in them
 	'''
-	final_json = []
-	
-	print()
 	tree = ET.parse(target_file)
 	root = tree.getroot()
-	print("Artifact locations for "+make_date(root))
+	
+	cur_date = make_date(root)
+	final_json = {}
+	final_json["date"] = cur_date	
+	final_json["content"] = []
+	
+	print()
+	print("Artifact locations for "+cur_date)
 	locations = root.find("locations")
 	for loc in list(locations):
 		objs = loc.find("objects")
@@ -66,7 +70,7 @@ def list_artifacts(filename):
 					
 					#[loc, x, y, item]
 					new_row = [loc_name, item_x, item_y, item_name]
-					final_json.append(new_row)
+					final_json["content"].append(new_row)
 	
 	write_json_to_file(final_json)
 

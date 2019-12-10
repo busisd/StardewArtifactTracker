@@ -26,6 +26,7 @@ class ValleyMap {
 	makeWrapperDiv() {
 		var wrapper_div = document.createElement("div");
 		wrapper_div.className="wrapper";
+		wrapper_div.id=this.name+"_wrapper";
 		
 		var title_span = document.createElement("h2");
 		title_span.innerText = this.name+":";
@@ -166,4 +167,16 @@ $(update_button).click(function(){
 		update_button.innerText = "Stop Auto Reload";
 	}
 });
+
+wrapper_list = []
+for (let i=0; i<maps_info.length; i++) {
+	wrapper_list.push($("#"+maps_info[i][0]+"_wrapper")[0]);
+}
+
+$("a").each(function(index){
+	$(this)[0].onclick = function(e) {
+		e.preventDefault();
+		window.scrollTo(0,wrapper_list[index].offsetTop-10);
+    }
+})
 

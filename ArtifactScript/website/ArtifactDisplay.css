@@ -149,7 +149,7 @@ h2, h3 {
 #tracked_input {
 	width: 98%;
 	resize: vertical;
-	height: 36pt;
+	height: 60pt;
 	
     background-color: rgba(230, 230, 230, 0.75);
 	margin-bottom: 12pt;
@@ -161,4 +161,9 @@ h2, h3 {
 
 .bold {
 	font-weight: bold;
+}
+
+li {
+	text-decoration: underline;
+	cursor: pointer;
 }

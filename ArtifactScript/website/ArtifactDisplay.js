@@ -79,6 +79,8 @@ class ValleyMap {
 		}
 		
 		this.spot_count += 1;
+		
+		return new_spot;
 	}
 	
 	removeSpots() {
@@ -96,11 +98,16 @@ class ValleyMap {
 		new_span.innerText = item_name+" at ("+x_str+", "+y_str+")";		
 		this.wrapper_div.appendChild(new_span);
 		this.wrapper_div.appendChild(document.createElement("br"));
+		
+		return new_span;
 	}
 	
 	addSpotAndTag(data_row) {
-		this.addSpot(data_row[1], data_row[2], data_row[3]);
-		this.addTag(data_row[1], data_row[2], data_row[3]);
+		let new_spot = this.addSpot(data_row[1], data_row[2], data_row[3]);
+		let new_tag = this.addTag(data_row[1], data_row[2], data_row[3]);
+		
+		new_tag.onmouseover = new_spot.onmouseover;
+		new_tag.onmouseout = new_spot.onmouseout;
 	}
 	
 	removeTags() {
@@ -171,7 +178,6 @@ var prev_date = null;
 var most_recent_result = null;
 function pingServerAndUpdate() {
 	$.getJSON("http://127.0.0.1:5000/", function(result){
-		// console.log(result);
 		if (prev_date !== result["date"]){
 			populateArtifactSpots(result["content"]);
 			prev_date = result["date"];
@@ -181,6 +187,8 @@ function pingServerAndUpdate() {
 			
 			checkTrackedItemMatches();
 			updateTrackedItemUl();
+			
+			updateDateDisplay(result["date"]);
 		}
 	});
 }
@@ -227,6 +235,8 @@ function updateTrackedItemList(){
 	for (let i=0; i<tracked_item_list.length; i++) {
 		tracked_item_list[i] = tracked_item_list[i].trim().toLowerCase();
 	}
+	
+	localStorage.tracked_artifacts_input = tracked_input.value;
 }
 
 var matching_item_list = [];
@@ -274,6 +284,7 @@ function updateTrackedItemUl(){
 		for (match_row of matching_item_list) {
 			let new_li = document.createElement("li");
 			new_li.innerText = dataRowToString(match_row);
+			new_li.onclick = document.getElementById(match_row[0]+"_nav").parentElement.onclick;
 			tracked_items_ul.appendChild(new_li);
 		}
 	}
@@ -284,3 +295,16 @@ $("#tracked_input").focusout(function() {
 	checkTrackedItemMatches();
 	updateTrackedItemUl();
 });
+
+var date_display = document.getElementById("date_display");
+function updateDateDisplay(date) {
+	date_display.innerText = date;
+}
+
+if (localStorage.tracked_artifacts_input) {
+	tracked_input.value = localStorage.tracked_artifacts_input;
+	updateTrackedItemList();
+	checkTrackedItemMatches();
+	updateTrackedItemUl();
+}
+

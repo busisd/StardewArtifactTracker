@@ -1,12 +1,10 @@
 from flask import Flask, render_template
-# from flask_socketio import SocketIO
 import sys
 import os
-# import artifact_script
+import artifact_script
+import threading
 
 app = Flask(__name__)
-# app.config['SECRET_KEY'] = 'secret!'
-# socketio = SocketIO(app)
 
 #makes only errors be logged to command line
 import logging
@@ -29,5 +27,7 @@ def main_page():
 		return json_file.read()
 
 if __name__ == '__main__':
-    # socketio.run(app)
-    app.run()
+	if (len(sys.argv) == 2):
+		data_update_thread = threading.Thread(target=artifact_script.start_tracking, args=(sys.argv[1], False), daemon=True)
+		data_update_thread.start()
+	app.run()

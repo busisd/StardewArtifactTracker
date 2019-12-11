@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title> Map Test </title>
+	<title> Stardew Artifact Tracker </title>
 	<script src="jquery-3.4.1.min.js"></script>
 	<script type="text/javascript" src="ArtifactDisplay.js" defer></script>
 	<link rel="stylesheet" type="text/css" href="ArtifactDisplay.css">
@@ -11,21 +11,22 @@
 <body>
 	<div id="top_bar"> 
 		<div id="nav_section">
-			<a href="#Forest_wrapper"><div class="nav_link">Forest</div></a>
-			<a href="#Farm_wrapper"><div class="nav_link">Farm</div></a> 
-			<a href="#Beach_wrapper"><div class="nav_link">Beach</div></a> 
-			<a href="#Desert_wrapper"><div class="nav_link">Desert</div></a> 
-			<a href="#Town_wrapper"><div class="nav_link">Town</div></a> 
-			<a href="#BusStop_wrapper"><div class="nav_link">BusStop</div></a> 
-			<a href="#Woods_wrapper"><div class="nav_link">Woods</div></a> 
-			<a href="#Mountain_wrapper"><div class="nav_link">Mountain</div></a> 
-			<a href="#Railroad_wrapper"><div class="nav_link">Railroad</div></a> 
-			<a href="#Backwoods_wrapper"><div class="nav_link">Backwoods</div></a> 
+			<a href="#Forest_wrapper"><div id="Forest_nav" class="nav_link">Forest</div></a>
+			<a href="#Farm_wrapper"><div id="Farm_nav" class="nav_link">Farm</div></a> 
+			<a href="#Beach_wrapper"><div id="Beach_nav" class="nav_link">Beach</div></a> 
+			<a href="#Desert_wrapper"><div id="Desert_nav" class="nav_link">Desert</div></a> 
+			<a href="#Town_wrapper"><div id="Town_nav" class="nav_link">Town</div></a> 
+			<a href="#BusStop_wrapper"><div id="BusStop_nav" class="nav_link">BusStop</div></a> 
+			<a href="#Woods_wrapper"><div id="Woods_nav" class="nav_link">Woods</div></a> 
+			<a href="#Mountain_wrapper"><div id="Mountain_nav" class="nav_link">Mountain</div></a> 
+			<a href="#Railroad_wrapper"><div id="Railroad_nav" class="nav_link">Railroad</div></a> 
+			<a href="#Backwoods_wrapper"><div id="Backwoods_nav" class="nav_link">Backwoods</div></a> 
 		</div>
 		<div id="button_div">
 			<button id="update_button"> Stop Auto Reload </button>
 		</div>
 		<div id="item_search_div">
+			<h2> Today's date: <span id="date_display"></span></h2> <br>
 			<span class="bold"> Tracked phrases: </span> <br>
 			<textarea id="tracked_input"></textarea> <br>
 			<span id="tracked_results_header" class="bold">No matches found</span>

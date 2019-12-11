@@ -41,7 +41,7 @@ def write_json_to_file(json_obj, json_filename="data.json"):
 		json_file.flush()
 
 target_file = None
-def list_artifacts(filename):
+def list_artifacts(filename, printout = True):
 	'''
 		Given a filename, will list each artifact spot in that file,
 		where those spots are, and what artifacts are in them
@@ -54,8 +54,9 @@ def list_artifacts(filename):
 	final_json["date"] = cur_date	
 	final_json["content"] = []
 	
-	print()
-	print("Artifact locations for "+cur_date)
+	if printout:
+		print()
+		print("Artifact locations for "+cur_date)
 	locations = root.find("locations")
 	for loc in list(locations):
 		objs = loc.find("objects")
@@ -66,7 +67,8 @@ def list_artifacts(filename):
 					item_x = item.find("key")[0][0].text
 					item_y = item.find("key")[0][1].text
 					item_name = predict_item(root, item, loc_name)
-					print(loc_name+": ("+item_x+", "+item_y+") is "+item_name)
+					if printout:
+						print(loc_name+": ("+item_x+", "+item_y+") is "+item_name)
 					
 					#[loc, x, y, item]
 					new_row = [loc_name, item_x, item_y, item_name]
@@ -152,7 +154,7 @@ def obj_is_arch(str_index):
 
 
 
-def handle_file_modified(event):
+def handle_file_modified(event, printout=True):
 	'''
 		If the event is a FileModifiedEvent and it is about the 
 		target file, calls list_artifacts on the modified file
@@ -162,9 +164,9 @@ def handle_file_modified(event):
 		return
 	if (os.path.split(target_file)[-1] != os.path.split(filename)[-1]):
 		return
-	list_artifacts(event.src_path)
+	list_artifacts(event.src_path, printout)
 	
-def track_file(path):
+def track_file(path, printout=True):
 	'''
 		Sets up a watchdog Observer that calles handle_file_modified whenever
 		a file in the given path is modified.
@@ -173,7 +175,7 @@ def track_file(path):
 						format='%(asctime)s - %(message)s',
 						datefmt='%Y-%m-%d %H:%M:%S')
 	event_handler = FileSystemEventHandler()
-	event_handler.on_modified = lambda event : handle_file_modified(event)
+	event_handler.on_modified = lambda event : handle_file_modified(event, printout)
 	observer = Observer()
 	observer.schedule(event_handler, path, recursive=False)
 	observer.start()
@@ -185,23 +187,26 @@ def track_file(path):
 	observer.join()
 	print()
 
+def start_tracking(filename, printout=True):	
+	global target_file
+	target_file = filename
+	if not os.path.isfile(target_file):
+		print("Error: "+target_file+" is not a valid file", file=sys.stderr)
+		return
+	
+	list_artifacts(target_file, printout)
+	path = os.path.dirname(target_file)
+	if path == "":
+		path = "./"
+	track_file(path, printout)
+	return
+
 def main():
 	if len(sys.argv) != 2:
 		print("Correct usage: python3 artifact_script.py [path/to/savefile]", file=sys.stderr)
 		return
 	
-	global target_file
-	target_file = sys.argv[1]
-	if not os.path.isfile(target_file):
-		print("Error: "+target_file+" is not a valid file", file=sys.stderr)
-		return
-	
-	list_artifacts(target_file)
-	path = os.path.dirname(target_file)
-	if path == "":
-		path = "./"
-	track_file(path)
-	return
+	start_tracking(sys.argv[1])
 
 if __name__ == "__main__":
 	main()

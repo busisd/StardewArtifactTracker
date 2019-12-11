@@ -5,9 +5,12 @@ class ValleyMap {
 		this.width = width;
 		this.height = height;
 		this.img_div = this.makeImgDiv();
+		this.artifacts_num_span = null;
 		this.wrapper_div = this.makeWrapperDiv();
 		this.spot_width = 1/width;
 		this.spot_height = 1/height;
+		
+		this.spot_count = 0;
 	}
 	
 	makeImgDiv() {
@@ -29,8 +32,11 @@ class ValleyMap {
 		wrapper_div.id=this.name+"_wrapper";
 		
 		var title_span = document.createElement("h2");
-		title_span.innerText = this.name+":";
+		title_span.innerText = this.name+": ";
 		wrapper_div.appendChild(title_span);
+		
+		this.artifacts_num_span = document.createElement("span");
+		title_span.appendChild(this.artifacts_num_span);
 		
 		wrapper_div.appendChild(this.img_div);
 		
@@ -71,12 +77,16 @@ class ValleyMap {
 			new_hover.classList.remove("fadein");
 			new_hover.classList.add("fadeout");
 		}
+		
+		this.spot_count += 1;
 	}
 	
 	removeSpots() {
 		while (this.img_div.children.length > 1) {
 			this.img_div.removeChild(this.img_div.children[1]);
 		}
+		
+		this.spot_count = 0;
 	}
 	
 	addTag(x, y, item_name) {
@@ -96,6 +106,14 @@ class ValleyMap {
 	removeTags() {
 		while (this.wrapper_div.children.length > 2) {
 			this.wrapper_div.removeChild(this.wrapper_div.children[2]);
+		}
+	}
+	
+	updateArtifactNumSpan(){
+		if (this.spot_count === 1) {
+			this.artifacts_num_span.innerText = this.spot_count.toString()+" artifact spot";
+		} else {
+			this.artifacts_num_span.innerText = this.spot_count.toString()+" artifact spots";
 		}
 	}
 	
@@ -133,7 +151,6 @@ function removeAllSpotsAndTags() {
 		all_maps[i][1].removeSpots();
 		all_maps[i][1].removeTags();
 	}
-
 }
 
 function populateArtifactSpots(data) {
@@ -143,13 +160,27 @@ function populateArtifactSpots(data) {
 	}
 }
 
+function updateAllNumSpans() {
+	all_maps = Object.entries(maps_dict);
+	for (map_row of all_maps) {
+		map_row[1].updateArtifactNumSpan();
+	}
+}
+
 var prev_date = null;
+var most_recent_result = null;
 function pingServerAndUpdate() {
 	$.getJSON("http://127.0.0.1:5000/", function(result){
 		// console.log(result);
 		if (prev_date !== result["date"]){
 			populateArtifactSpots(result["content"]);
 			prev_date = result["date"];
+			most_recent_result = result;
+						
+			updateAllNumSpans();
+			
+			checkTrackedItemMatches();
+			updateTrackedItemUl();
 		}
 	});
 }
@@ -168,7 +199,7 @@ $(update_button).click(function(){
 	}
 });
 
-wrapper_list = []
+var wrapper_list = []
 for (let i=0; i<maps_info.length; i++) {
 	wrapper_list.push($("#"+maps_info[i][0]+"_wrapper")[0]);
 }
@@ -180,3 +211,76 @@ $("a").each(function(index){
     }
 })
 
+
+var tracked_input = document.getElementById("tracked_input");
+var tracked_item_list = [];
+function updateTrackedItemList(){
+	let items_string = tracked_input.value;
+	tracked_item_list = items_string.split("\n");
+	
+	let index = tracked_item_list.indexOf("");
+	while (index !== -1){
+		tracked_item_list.splice(index, 1);
+		index = tracked_item_list.indexOf("");
+	}
+	
+	for (let i=0; i<tracked_item_list.length; i++) {
+		tracked_item_list[i] = tracked_item_list[i].trim().toLowerCase();
+	}
+}
+
+var matching_item_list = [];
+function checkTrackedItemMatches(){
+	matching_item_list = [];
+	if (most_recent_result === null || most_recent_result["content"].length === 0 || tracked_item_list.length === 0) {
+		return
+	}
+	
+	foundIndices = [];
+	for (let i=0; i<tracked_item_list.length; i++) {
+		for (let j=0; j<most_recent_result["content"].length; j++) {
+			let cur_content_item = most_recent_result["content"][j][3].trim().toLowerCase();
+			if (cur_content_item.includes(tracked_item_list[i]) && foundIndices.indexOf(j) === -1) {
+				matching_item_list.push(most_recent_result["content"][j]);
+				foundIndices.push(j);
+				continue;
+			}
+		}
+	}
+}
+
+function dataRowToString(row) {
+	return row[0].toString()+" "+"("+row[1].toString()+", "+row[2].toString()+"): "+row[3].toString();
+}
+
+var tracked_items_header = document.getElementById("tracked_results_header");
+var tracked_items_ul = document.getElementById("tracked_results_list");
+function updateTrackedItemUl(){
+	while (tracked_items_ul.lastChild) {
+		tracked_items_ul.removeChild(tracked_items_ul.lastChild);
+	}
+	
+	if (matching_item_list.length === 0) {
+		tracked_items_ul.style.display = "none";
+		tracked_items_header.innerText = "No matches found";
+	} else {
+		tracked_items_ul.style.display = "inherit";
+		if (matching_item_list.length === 1) {
+			tracked_items_header.innerText = "1 match found:";
+		} else {
+			tracked_items_header.innerText = matching_item_list.length.toString()+" matches found:";
+		}
+		
+		for (match_row of matching_item_list) {
+			let new_li = document.createElement("li");
+			new_li.innerText = dataRowToString(match_row);
+			tracked_items_ul.appendChild(new_li);
+		}
+	}
+}
+
+$("#tracked_input").focusout(function() { 
+	updateTrackedItemList();
+	checkTrackedItemMatches();
+	updateTrackedItemUl();
+});

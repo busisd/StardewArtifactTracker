@@ -110,7 +110,7 @@ img {
 
 .artifact_spot_hover {
 	position: absolute;
-	left: 20px;
+	left: 200%;
 	padding: 10px;
 	margin-top: -15px;
 	background-color: white;
@@ -131,4 +131,34 @@ img {
 
 h2, h3 {
 	margin: 0;
+}
+
+#item_search_div {
+	position: fixed;
+	left: 0px;
+	top: 50px;
+	width: 20%;
+	margin: 2%;
+	
+    padding: 20px;
+    background-color: rgba(255,255,255,.65);
+    border-radius: 20px;
+    border: 1px solid rgba(220,220,220,.65);
+}
+
+#tracked_input {
+	width: 98%;
+	resize: vertical;
+	height: 36pt;
+	
+    background-color: rgba(230, 230, 230, 0.75);
+	margin-bottom: 12pt;
+}
+
+#tracked_results_list {
+	display: none;
+}
+
+.bold {
+	font-weight: bold;
 }

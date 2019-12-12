@@ -206,7 +206,7 @@ function pingServerAndUpdate() {
 }
 
 pingServerAndUpdate();
-var update_interval = setInterval(pingServerAndUpdate, 5000);
+var update_interval = setInterval(pingServerAndUpdate, 2500);
 update_button = document.getElementById("update_button");
 $(update_button).click(function(){
 	if (update_interval !== null) {
@@ -214,7 +214,7 @@ $(update_button).click(function(){
 		update_interval = null;
 		update_button.innerText = "Start Auto Reload";
 	} else {
-		update_interval = setInterval(pingServerAndUpdate, 5000);
+		update_interval = setInterval(pingServerAndUpdate, 2500);
 		update_button.innerText = "Stop Auto Reload";
 	}
 });

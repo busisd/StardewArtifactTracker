@@ -3,7 +3,7 @@ A tool for displaying Stardew Valley artifact spots and their contents in order 
 
 A website display that shows which artifacts are on the map, and where, updating every day. Allows tracking specified terms to find specific artifacts.
 
-![Screenshot of Site](https://github.com/busisd/StardewArtifactTracker/tree/master/ArtifactScript/website_resources/Website_Example_Screenshot.png)
+![Screenshot of Site](https://raw.githubusercontent.com/busisd/StardewArtifactTracker/master/ArtifactScript/website_resources/Website_Example_Screenshot.png)
 
 Can also be used solely as a command-line program that outputs the names and locations of all found items each day.
 

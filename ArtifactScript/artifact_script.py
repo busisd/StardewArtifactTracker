@@ -1,3 +1,6 @@
+# Author: Daniel Busis
+# A script that, placed in a Stardew Valley savefile 
+
 import xml.etree.ElementTree as ET
 import sys
 import os
@@ -35,6 +38,10 @@ files with the .xnb file data. See README for how to do so.''', file=sys.stderr)
 
 
 def write_json_to_file(json_obj, json_filename="data.json"):
+	'''
+		Writes json data containing the date and all artifacts found
+		to the file data.json
+	'''
 	full_filename = os.path.join(sys.path[0], json_filename)
 	with open(full_filename, "w") as json_file:
 		json_file.write(json.dumps(json_obj))
@@ -187,7 +194,11 @@ def track_file(path, printout=True):
 	observer.join()
 	print()
 
-def start_tracking(filename, printout=True):	
+def start_tracking(filename, printout=True):
+	'''
+		Sets up the global target_file, and calculates the path to its containing dict.
+		Then calls track_file.
+	'''
 	global target_file
 	target_file = filename
 	if not os.path.isfile(target_file):

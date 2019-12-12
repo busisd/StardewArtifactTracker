@@ -1,6 +1,9 @@
 # StardewArtifactTracker
-A script that, at the start of each new Stardew day, will automatically print out a list of artifact spot locations and 
-what items are in those spots. Will also print the artifacts of the current day when first run.
+A tool for displaying Stardew Valley artifact spots and their contents in order to find annoyingly rare items! 
+
+A website display that shows which artifacts are on the map, and where, updating every day. Allows tracking specified terms to find specific artifacts.
+
+Can also be used solely as a command-line program that outputs the names and locations of all found items each day.
 
 To run, place the ArtifactScript folder into the folder with your savefile in it. For example:
 ```
@@ -13,7 +16,11 @@ Additionally, to simulate the random number generation of Stardew Valley (writte
 
 Finally, to run the script, cd into its folder and type the following:
 ```
-python3 artifact_script.py ../character_1234567890
+python3 artifact_website.py ../character_1234567890
 ```
 (where character_1234567890 is replaced by the name of the corresponding file in your folder).
 
+If you wish to only use the command line program, type:
+```
+python3 artifact_script.py ../character_1234567890
+```

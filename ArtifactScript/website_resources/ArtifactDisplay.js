@@ -124,6 +124,10 @@ class ValleyMap {
 		}
 	}
 	
+	updateNavLinkNumSpan(){
+		navs_dict[this.name].firstElementChild.innerText=" ("+this.spot_count.toString()+")";
+	}
+	
 	static doubleToPercent(d) {
 		return (d*100).toString()+"%"
 	}
@@ -174,6 +178,13 @@ function updateAllNumSpans() {
 	}
 }
 
+function updateAllNavLinkNums() {
+	all_maps = Object.entries(maps_dict);
+	for (map_row of all_maps) {
+		map_row[1].updateNavLinkNumSpan();
+	}
+}
+
 var prev_date = null;
 var most_recent_result = null;
 function pingServerAndUpdate() {
@@ -189,6 +200,7 @@ function pingServerAndUpdate() {
 			updateTrackedItemUl();
 			
 			updateDateDisplay(result["date"]);
+			updateAllNavLinkNums();
 		}
 	});
 }
@@ -263,6 +275,19 @@ function dataRowToString(row) {
 	return row[0].toString()+" "+"("+row[1].toString()+", "+row[2].toString()+"): "+row[3].toString();
 }
 
+navs_dict = {
+	"Forest" : document.getElementById("Forest_nav"),
+	"Farm" : document.getElementById("Farm_nav"),
+	"Beach" : document.getElementById("Beach_nav"),
+	"Desert" : document.getElementById("Desert_nav"),
+	"Town" : document.getElementById("Town_nav"),
+	"BusStop" : document.getElementById("BusStop_nav"),
+	"Woods" : document.getElementById("Woods_nav"),
+	"Mountain" : document.getElementById("Mountain_nav"),
+	"Railroad" : document.getElementById("Railroad_nav"),
+	"Backwoods" : document.getElementById("Backwoods_nav")
+}
+
 var tracked_items_header = document.getElementById("tracked_results_header");
 var tracked_items_ul = document.getElementById("tracked_results_list");
 function updateTrackedItemUl(){
@@ -284,7 +309,7 @@ function updateTrackedItemUl(){
 		for (match_row of matching_item_list) {
 			let new_li = document.createElement("li");
 			new_li.innerText = dataRowToString(match_row);
-			new_li.onclick = document.getElementById(match_row[0]+"_nav").parentElement.onclick;
+			new_li.onclick = navs_dict[match_row[0]].parentElement.onclick;
 			tracked_items_ul.appendChild(new_li);
 		}
 	}
@@ -307,4 +332,3 @@ if (localStorage.tracked_artifacts_input) {
 	checkTrackedItemMatches();
 	updateTrackedItemUl();
 }
-

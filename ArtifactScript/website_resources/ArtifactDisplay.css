@@ -167,3 +167,7 @@ li {
 	text-decoration: underline;
 	cursor: pointer;
 }
+
+.nav_link_num {
+	white-space: pre;
+}
